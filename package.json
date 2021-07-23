@@ -4,7 +4,7 @@
         "dev": "vite",
         "build": "vite build",
         "serve": "vite preview",
-        "publish": "vite build && git subtree push --prefix dist origin gh-pages"
+        "publish": "git subtree push --prefix dist origin gh-pages"
     },
     "dependencies": {
         "vue": "^3.0.5"
