@@ -1,0 +1,26 @@
+name: meiliplus
+services:
+  appserver:
+    type: nginx
+    webroot: ./dist
+    ssl: true
+  node:
+    type: node
+  meilisearch:
+    type: compose
+    app_mount: false
+    services:
+      image: getmeili/meilisearch:latest
+      command: tini -- /bin/sh -c ./meilisearch
+      ports:
+        - '7701:7700'
+    volumes:
+      meilisearch:
+tooling:
+  npm:
+    service: node
+proxy:
+  appserver:
+    - meiliplus.lndo.site
+  meilisearch:
+    - meiliplus-search.lndo.site:7700
