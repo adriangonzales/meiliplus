@@ -23,10 +23,10 @@
                   Not Connected
                 </div>
             </div>
-            <button class="rounded text-xs p-2 capitalize bg-gray-300 dark:bg-gray-600 " @click="toggleTheme()">
+            <button-base class="rounded" @click="toggleTheme()">
               <SunIcon v-if="theme === 'dark'" class="w-3 fill-current" />
               <MoonIcon v-if="theme === 'light'" class="w-3 fill-current" />
-            </button>
+            </button-base>
           </div>
       </header>
       <main class="flex-grow overflow-y-auto">
@@ -41,22 +41,22 @@
             </div>
             <div v-if="!connecting" class="flex flex-col rounded shadow-xl bg-gray-100 dark:bg-gray-700 w-full max-w-lg">
               <div class="flex rounded-t">
-                <input type="input" v-model="server" class="form-input flex-grow px-2 py-3 bg-transparent">
-                <input type="input" v-model="port" class="form-input w-20 px-2 py-3 bg-transparent border-l border-gray-200 dark:border-gray-600">
+                <input type="input" v-model="server" class="flex-grow px-2 py-3 bg-transparent">
+                <input type="input" v-model="port" class="w-20 px-2 py-3 bg-transparent border-l border-gray-200 dark:border-gray-600">
               </div>
 
               <div class="border-t border-gray-200 dark:border-gray-600">
-                <input type="password" v-model="apiKey" placeholder="API Key" class="form-input border-0 w-full px-2 py-3 bg-transparent">
+                <input type="password" v-model="apiKey" placeholder="API Key" class="border-0 w-full px-2 py-3 bg-transparent">
               </div>
 
-              <button class="bg-primary-200 dark:bg-primary-800 rounded-b px-2 py-3" @click="connect()">Connect</button>
+              <button-base class="bg-primary-200 dark:bg-primary-800 rounded-b px-2 py-3" @click="connect()">Connect</button-base>
             </div>
         </div>
 
         <div v-if="connected" class="h-full w-full flex items-center justify-center">
           <nav class="h-full flex flex-col flex-shrink-0 text-sm w-60 bg-gray-200 dark:bg-gray-800 border-r border-gray-300 dark:border-gray-900">
-            <form @submit.prevent="doQuery()" class="flex w-full items-center py-2 px-4">
-              <input type="search" v-model="indexFilter" placeholder="Search for index" class="form-input flex-grow rounded-l px-2 py-1 bg-transparent border border-gray-400 dark:border-gray-600">
+            <form @submit.prevent="doSearch()" class="flex w-full items-center py-2 px-4">
+              <input type="search" v-model="indexFilter" placeholder="Search for index" class="flex-grow rounded-l px-2 py-1 bg-transparent border border-gray-400 dark:border-gray-600">
             </form>
             <div class="h-full flex flex-col overflow-y-auto">
               <div class="flex flex-col">
@@ -71,48 +71,13 @@
                 </button>
               </div>
             </div>
+            <div class="flex py-2 px-4">
+              <button-base>Refresh</button-base>
+              <button-base>New Index</button-base>
+            </div>
           </nav>
-          <section class="flex-grow flex flex-col h-full">
-            <div class="flex flex-col items-center px-4 border-b border-gray-400 dark:border-gray-700 bg-gray-300 dark:bg-gray-900">
-              <form @submit.prevent="doQuery()" class="flex w-full items-center py-2">
-                <input type="search" v-model="query" class="form-input flex-grow rounded-l px-2 py-1 bg-transparent border border-gray-400 dark:border-gray-600 ">
-                <button class="rounded-r py-1 px-2 border border-gray-400 dark:border-gray-600 bg-gray-400 dark:bg-gray-600">Search</button>
-              </form>
-              <div class="flex w-full items-center py-2">
-                <button class="rounded py-1 px-2 text-xs dark:border-gray-600 bg-gray-400 dark:bg-gray-600" @click="clearQuery()">Unset</button>
-              </div>
-            </div>
-            <div class="overflow-y-auto">
-              <div v-if="results && results.hits" class="flex-grow h-full">
-                <table class="table-auto w-full">
-                  <thead class="sticky top-0 w-full text-sm">
-                    <tr class="w-full bg-gray-300 dark:bg-gray-900 border-b border-gray-400 dark:border-gray-600">
-                      <th
-                        class="border-r border-gray-400 dark:border-gray-600"
-                        v-for="resultProperty in Object.keys(results.hits[0])"
-                        :key="resultProperty">
-                        {{ resultProperty }}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody class="px-4">
-                    <tr
-                      v-for="(hit, index) in results.hits"
-                      :key="index"
-                      :class="rowClasses[index % 2]">
-                      <td
-                        v-for="resultProperty in Object.keys(hit)"
-                        :key="resultProperty"
-                        class="border-r border-gray-400 dark:border-gray-600 py-1 px-2">{{ hit[resultProperty] }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div v-else class="p-4 text-gray-500 dark:text-gray-600">
-                No Results
-              </div>
-            </div>
-          </section>
+
+          <index-results :table="table" :results="results" :primary-key="primaryKey" />
         </div>
       </main>
     </div>
@@ -121,17 +86,21 @@
 
 <script>
 import { MeiliSearch } from 'meilisearch'
+import ButtonBase from "./components/ui/ButtonBase.vue";
 import IndexIcon from './components/icons/index.vue';
 import ErrorIcon from './components/icons/error.vue';
 import SunIcon from './components/icons/sun.vue';
 import MoonIcon from './components/icons/moon.vue';
+import IndexResults from "./components/views/IndexResults.vue";
 
 export default {
     components: {
+      ButtonBase,
       IndexIcon,
       ErrorIcon,
       SunIcon,
       MoonIcon,
+      IndexResults
     },
     data() {
         return {
@@ -150,10 +119,16 @@ export default {
             primaryKey: 'id',
             results: null,
             query: null,
+            offset: 0,
+            limit: 10,
             rowClasses: [
               'text-gray-900 dark:text-gray-100 bg-gray-200 dark:bg-gray-800',
               'text-gray-900 dark:text-gray-100 bg-gray-300 dark:bg-gray-900'
-            ]
+            ],
+            table: {
+              isLoading: false,
+              isReSearch: false,
+            }
         };
     },
 
@@ -176,6 +151,26 @@ export default {
 
           return hostUrl;
       },
+      tableColumns: function () {
+          let columns = [];
+
+          if (this.results.hits) {
+            Object.keys(this.results.hits[0]).forEach(attribute => {
+              let column = {
+                label: attribute,
+                field: attribute
+              };
+
+              if (attribute === this.primaryKey) {
+                column.isKey = true;
+              }
+
+              columns.push(column);
+            });
+          }
+
+          return columns;
+      },
       filteredIndexes: function () {
         if (this.indexFilter) {
           let searchToken = new RegExp(this.indexFilter, 'ig')
@@ -189,7 +184,7 @@ export default {
     watch: {
         indexName: async function (val) {
           this.index = this.client.index(val);
-          this.results = await this.index.search();
+          this.results = await this.sendQuery();
         },
         server: function (val) {
           this.$nextTick(()=>{
@@ -225,9 +220,23 @@ export default {
         setIndex (uid) {
           this.indexName = uid;
         },
-        async doQuery () {
-          this.results = await this.index.search(this.query);
+        async sendQuery () {
+          let searchParams = {
+            offset: this.offset,
+            limit: this.limit
+          }
+
+          return await this.index.search(this.query, searchParams);
         },
+
+        async doSearch (offset = 0, limit = null) {
+          this.table.isLoading = true;
+          this.table.isReSearch = offset == undefined ? true : false;
+          this.offset = parseInt(offset)
+          this.limit = parseInt(limit)
+          this.results = await this.sendQuery();
+        },
+
         async clearQuery () {
           this.query = null;
           this.results = await this.index.search();
