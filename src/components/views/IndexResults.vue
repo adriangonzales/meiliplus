@@ -1,114 +1,162 @@
 <template>
-    <section class="flex-grow flex flex-col h-full">
-        <div class="flex flex-col items-center px-4 border-b border-gray-400 dark:border-gray-700 bg-gray-300 dark:bg-gray-900">
-            <form @submit.prevent="doSearch()" class="flex w-full items-center py-2">
-                <input type="search" v-model="query" class="flex-grow rounded-l px-2 py-1 bg-transparent border border-gray-400 dark:border-gray-600 ">
-                <button-base type="submit" class="border border-l-0 rounded-r py-1">Search</button-base>
-            </form>
-            <div class="flex w-full items-center py-2">
-                <button-base class="rounded py-1 text-xs dark:border-gray-600 bg-gray-400 dark:bg-gray-600" @click="clearQuery()">Unset</button-base>
-            </div>
-        </div>
-        <div class="overflow-y-auto">
-            <div class="flex-grow h-full">
+    <section>
+        <results-toolbar
+            :filter="query"
+            @change-filter="handleFilterChange"
+            @clear-filter="handleFilterClear"
+            class="flex flex-col items-center px-4 border-b border-gray-400 dark:border-gray-700 bg-gray-300 dark:bg-gray-900" />
+
+        <div class="overflow-y-auto flex-grow h-full">
+            <template v-if="results && results.hits">
                 <results-table
-                    v-if="results && results.hits"
-                    :has-checkbox="true"
-                    :is-loading="table.isLoading"
-                    :is-re-search="table.isReSearch"
+                    v-if="view === 'table'"
                     :columns="tableColumns"
                     :rows="results.hits"
-                    :total="results.nbHits"
                     @return-checked-rows="updateCheckedRows"
                 ></results-table>
+                <results-list
+                    v-if="view === 'list'"
+                    :rows="results.hits"
+                    @return-checked-rows="updateCheckedRows"
+                ></results-list>
+            </template>
 
-                <!-- <table class="table-auto w-full">
-                    <thead class="sticky top-0 w-full text-sm">
-                    <tr class="w-full bg-gray-300 dark:bg-gray-900 border-b border-gray-400 dark:border-gray-600">
-                        <th
-                        class="border-r border-gray-400 dark:border-gray-600"
-                        v-for="resultProperty in Object.keys(results.hits[0])"
-                        :key="resultProperty">
-                        {{ resultProperty }}
-                        </th>
-                    </tr>
-                    </thead>
-                    <tbody class="px-4">
-                    <tr
-                        v-for="(hit, index) in results.hits"
-                        :key="index"
-                        :class="rowClasses[index % 2]">
-                        <td
-                        v-for="resultProperty in Object.keys(hit)"
-                        :key="resultProperty"
-                        class="border-r border-gray-400 dark:border-gray-600 py-1 px-2">{{ hit[resultProperty] }}</td>
-                    </tr>
-                    </tbody>
-                </table> -->
-                <div v-else class="p-4 text-gray-500 dark:text-gray-600">
-                    No Results
-                </div>
+            <div v-else class="p-4 text-gray-500 dark:text-gray-600">
+                No Results
             </div>
         </div>
-        <results-paginator
+
+        <results-footer
             v-if="results && results.hits"
-            :is-re-search="table.isReSearch"
+            :is-re-search="isReSearch"
+            :is-loading="isLoading"
             :rows="results.hits"
             :total="results.nbHits"
-            class="px-4 py-8 flex justify-between items-center"
-        ></results-paginator>
+            :offset="offset"
+            :limit="limit"
+            :results-view="view"
+            class="px-4 py-1 flex justify-between items-center text-gray-600 dark:text-gray-400 border-t border-gray-400 dark:border-gray-700 bg-gray-300 dark:bg-gray-900"
+            @change-page="handlePageChange"
+            @change-view="handleViewChange"
+        ></results-footer>
     </section>
 </template>
 
 <script>
-import ButtonBase from "../ui/ButtonBase.vue";
-import ResultsTable from "../ui/ResultsTable.vue";
-import ResultsPaginator from "../ui/ResultsPaginator.vue";
+import ButtonBase from "../controls/ButtonBase.vue";
+import ResultsToolbar from "./Results/ResultsToolbar.vue";
+import ResultsTable from "./Results/ResultsTable.vue";
+import ResultsList from "./Results/ResultsList.vue";
+import ResultsFooter from "./Results/ResultsFooter.vue";
 
 export default {
     components: {
       ButtonBase,
+      ResultsToolbar,
       ResultsTable,
-      ResultsPaginator
+      ResultsList,
+      ResultsFooter
     },
     props: {
-        query: {
+        index: {
             default: null
-        },
-        results: {
-            default: null
-        },
-        primaryKey: {
-            default: null
-        },
-        table: Object
+        }
+    },
+    data() {
+        return {
+            view: 'table',
+            isLoading: false,
+            indexes: null,
+            primaryKey: 'id',
+            results: null,
+            query: null,
+            offset: 0,
+            limit: 10,
+            rowClasses: [
+              'text-gray-900 dark:text-gray-100 bg-gray-200 dark:bg-gray-800',
+              'text-gray-900 dark:text-gray-100 bg-gray-300 dark:bg-gray-900'
+            ]
+        };
     },
     computed: {
+        isReSearch: function () {
+            return this.offset == undefined ? true : false
+        },
         tableColumns: function () {
             let columns = [];
 
             if (this.results.hits) {
-            Object.keys(this.results.hits[0]).forEach(attribute => {
-                let column = {
-                label: attribute,
-                field: attribute
-                };
+                Object.keys(this.results.hits[0]).forEach(attribute => {
+                    let column = {
+                        label: attribute,
+                        field: attribute
+                    };
 
-                if (attribute === this.primaryKey) {
-                column.isKey = true;
-                }
+                    if (attribute === this.primaryKey) {
+                        column.isKey = true;
+                    }
 
-                columns.push(column);
-            });
+                    columns.push(column);
+                });
             }
 
             return columns;
         }
     },
+
+    watch: {
+        index: function () {
+            this.handleFilterClear();
+        }
+    },
+
+    mounted: function() {
+      if (localStorage.getItem('resultView') === 'list') {
+        this.view = 'list'
+      } else {
+        this.view = 'table'
+      }
+    },
+
     methods: {
         updateCheckedRows(rowsKey) {
             console.log('updateCheckedRows', rowsKey);
         },
+        setLoading(status = true) {
+            this.isLoading = status;
+        },
+        handleViewChange (view) {
+            localStorage.setItem('resultView', view)
+            this.view = view
+        },
+        setPage(offset = 0, limit = 10) {
+            this.offset = offset
+            this.limit = limit
+        },
+        handlePageChange (offset = 0, limit = null) {
+            this.setLoading()
+            this.setPage(parseInt(offset), parseInt(limit))
+            this.sendQuery();
+        },
+        handleFilterChange (filter) {
+            this.setLoading()
+            this.setPage()
+            this.query = filter
+            this.sendQuery();
+        },
+        async sendQuery () {
+            let searchParams = {
+                offset: this.offset,
+                limit: this.limit
+            }
+
+            this.results = await this.index.search(this.query, searchParams);
+        },
+        handleFilterClear () {
+            this.setPage()
+            this.query = null;
+            this.sendQuery();
+        }
     }
 }
 </script>

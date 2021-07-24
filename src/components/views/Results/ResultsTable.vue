@@ -183,18 +183,10 @@ export default defineComponent({
       emit("return-checked-rows", []);
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const stringFormat = (template: string, ...args: any[]) => {
-      return template.replace(/{(\d+)}/g, function (match, number) {
-        return typeof args[number] != "undefined" ? args[number] : match;
-      });
-    };
-
     return {
         setting,
         rowsChecked,
-        handleRowCheck,
-        stringFormat,
+        handleRowCheck
     };
   },
 });

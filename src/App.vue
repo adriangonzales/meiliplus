@@ -54,30 +54,15 @@
         </div>
 
         <div v-if="connected" class="h-full w-full flex items-center justify-center">
-          <nav class="h-full flex flex-col flex-shrink-0 text-sm w-60 bg-gray-200 dark:bg-gray-800 border-r border-gray-300 dark:border-gray-900">
-            <form @submit.prevent="doSearch()" class="flex w-full items-center py-2 px-4">
-              <input type="search" v-model="indexFilter" placeholder="Search for index" class="flex-grow rounded-l px-2 py-1 bg-transparent border border-gray-400 dark:border-gray-600">
-            </form>
-            <div class="h-full flex flex-col overflow-y-auto">
-              <div class="flex flex-col">
-                <button
-                  type="button"
-                  class="text-left py-2 px-4 flex items-center"
-                  :class="{'font-bold bg-primary-200 dark:bg-primary-800': indexName == idx.uid}"
-                  v-for="idx in filteredIndexes" :key="idx.uid"
-                  @click="setIndex(idx.uid)">
-                  <IndexIcon class="w-4 mr-2 text-primary-300 fill-current" />
-                  {{ idx.name }}
-                </button>
-              </div>
-            </div>
-            <div class="flex py-2 px-4">
-              <button-base>Refresh</button-base>
-              <button-base>New Index</button-base>
-            </div>
-          </nav>
+          <index-list
+            :indexes="indexes"
+            @refresh-indexes="handleIndexRefresh"
+            @select-index="handleIndexSelect"
+            class="h-full flex flex-col flex-shrink-0 text-sm w-60 bg-gray-300 dark:bg-gray-800 border-r border-gray-400 dark:border-gray-900" />
 
-          <index-results :table="table" :results="results" :primary-key="primaryKey" />
+          <index-results
+            :index="index"
+            class="flex-grow flex flex-col h-full" />
         </div>
       </main>
     </div>
@@ -86,12 +71,13 @@
 
 <script>
 import { MeiliSearch } from 'meilisearch'
-import ButtonBase from "./components/ui/ButtonBase.vue";
+import ButtonBase from "./components/controls/ButtonBase.vue";
 import IndexIcon from './components/icons/index.vue';
 import ErrorIcon from './components/icons/error.vue';
 import SunIcon from './components/icons/sun.vue';
 import MoonIcon from './components/icons/moon.vue';
 import IndexResults from "./components/views/IndexResults.vue";
+import IndexList from './components/views/IndexList.vue';
 
 export default {
     components: {
@@ -100,7 +86,8 @@ export default {
       ErrorIcon,
       SunIcon,
       MoonIcon,
-      IndexResults
+      IndexResults,
+      IndexList
     },
     data() {
         return {
@@ -115,20 +102,6 @@ export default {
             indexes: null,
             indexName: null,
             index: null,
-            indexFilter: null,
-            primaryKey: 'id',
-            results: null,
-            query: null,
-            offset: 0,
-            limit: 10,
-            rowClasses: [
-              'text-gray-900 dark:text-gray-100 bg-gray-200 dark:bg-gray-800',
-              'text-gray-900 dark:text-gray-100 bg-gray-300 dark:bg-gray-900'
-            ],
-            table: {
-              isLoading: false,
-              isReSearch: false,
-            }
         };
     },
 
@@ -150,41 +123,12 @@ export default {
           }
 
           return hostUrl;
-      },
-      tableColumns: function () {
-          let columns = [];
-
-          if (this.results.hits) {
-            Object.keys(this.results.hits[0]).forEach(attribute => {
-              let column = {
-                label: attribute,
-                field: attribute
-              };
-
-              if (attribute === this.primaryKey) {
-                column.isKey = true;
-              }
-
-              columns.push(column);
-            });
-          }
-
-          return columns;
-      },
-      filteredIndexes: function () {
-        if (this.indexFilter) {
-          let searchToken = new RegExp(this.indexFilter, 'ig')
-          return this.indexes.filter(({ name, uid }) => (name + uid).match(searchToken))
-        }
-
-        return this.indexes
-      },
+      }
     },
 
     watch: {
-        indexName: async function (val) {
+        indexName: function (val) {
           this.index = this.client.index(val);
-          this.results = await this.sendQuery();
         },
         server: function (val) {
           this.$nextTick(()=>{
@@ -201,7 +145,7 @@ export default {
         disconnect () {
           this.connected = false
         },
-        async connect () {
+        connect () {
           this.connecting = true
 
           localStorage.setItem('server', this.server)
@@ -213,33 +157,18 @@ export default {
             apiKey: this.apiKey,
           })
 
-          this.indexes = await this.client.listIndexes();
+          this.getIndexes()
           this.connecting = false
           this.connected = true
         },
-        setIndex (uid) {
-          this.indexName = uid;
+        async getIndexes () {
+          this.indexes = await this.client.listIndexes();
         },
-        async sendQuery () {
-          let searchParams = {
-            offset: this.offset,
-            limit: this.limit
-          }
-
-          return await this.index.search(this.query, searchParams);
+        handleIndexRefresh () {
+          this.getIndexes()
         },
-
-        async doSearch (offset = 0, limit = null) {
-          this.table.isLoading = true;
-          this.table.isReSearch = offset == undefined ? true : false;
-          this.offset = parseInt(offset)
-          this.limit = parseInt(limit)
-          this.results = await this.sendQuery();
-        },
-
-        async clearQuery () {
-          this.query = null;
-          this.results = await this.index.search();
+        handleIndexSelect (uid) {
+          this.indexName = uid
         }
     }
 };
