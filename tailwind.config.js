@@ -9,11 +9,17 @@ module.exports = {
         gray: colors.trueGray,
         primary: colors.sky,
         secondary: colors.teal
+      },
+      gridTemplateColumns: {
+        'offset': 'minmax(100px, 1fr) 3fr',
       }
     },
   },
   variants: {
-    extend: {},
+    extend: {
+      opacity: ['disabled'],
+      backgroundColor: ['active'],
+    },
   },
   plugins: [
     require('@tailwindcss/forms')

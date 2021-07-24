@@ -17,6 +17,7 @@
         "meilisearch": "^0.19.0",
         "postcss": "^8.3.6",
         "tailwindcss": "^2.2.6",
-        "vite": "^2.4.2"
+        "vite": "^2.4.2",
+        "vue3-table-lite": "^1.0.6"
     }
 }
