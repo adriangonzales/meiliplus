@@ -14,6 +14,10 @@
 
 @layer components {
   .btn {
-    @apply px-4 py-2 bg-blue-600 text-white rounded;
+    @apply p-2 bg-white active:bg-bright-200 border-bright-500 dark:bg-dim-400 dark:border-dim-400 dark:active:bg-dim-300 disabled:opacity-50;
+  }
+
+  .label {
+    @apply select-none text-bright-700 dark:text-dim-200;
   }
 }

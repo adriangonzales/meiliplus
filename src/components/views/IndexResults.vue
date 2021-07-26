@@ -4,7 +4,7 @@
             :filter="query"
             @change-filter="handleFilterChange"
             @clear-filter="handleFilterClear"
-            class="flex flex-col items-center px-4 border-b border-gray-400 dark:border-gray-700 bg-gray-300 dark:bg-gray-900" />
+            class="flex flex-col items-center px-4 border-b border-bright-400 dark:border-black bg-bright-300 dark:bg-dim-900" />
 
         <div class="overflow-y-auto flex-grow h-full">
             <template v-if="results && results.hits">
@@ -21,7 +21,7 @@
                 ></results-list>
             </template>
 
-            <div v-else class="p-4 text-gray-500 dark:text-gray-600">
+            <div v-else class="p-4 text-bright-500 dark:text-dim-600">
                 No Results
             </div>
         </div>
@@ -35,7 +35,7 @@
             :offset="offset"
             :limit="limit"
             :results-view="view"
-            class="px-4 py-1 flex justify-between items-center text-gray-600 dark:text-gray-400 border-t border-gray-400 dark:border-gray-700 bg-gray-300 dark:bg-gray-900"
+            class="px-4 py-1 flex justify-between items-center border-t border-bright-400 dark:border-dim-700 bg-bright-300 dark:bg-dim-900"
             @change-page="handlePageChange"
             @change-view="handleViewChange"
         ></results-footer>
@@ -73,8 +73,8 @@ export default {
             offset: 0,
             limit: 10,
             rowClasses: [
-              'text-gray-900 dark:text-gray-100 bg-gray-200 dark:bg-gray-800',
-              'text-gray-900 dark:text-gray-100 bg-gray-300 dark:bg-gray-900'
+              'text-bright-900 dark:text-dim-100 bg-bright-200 dark:bg-dim-800',
+              'text-bright-900 dark:text-dim-100 bg-bright-300 dark:bg-dim-900'
             ]
         };
     },

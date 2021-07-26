@@ -1,9 +1,9 @@
 <template>
     <div>
-        <div v-for="(row, i) in rows" :key="i" class="rounded my-6 mx-6 p-6 text-gray-900 dark:text-gray-100 bg-gray-300 dark:bg-gray-900 border border-gray-400 dark:border-gray-600">
+        <div v-for="(row, i) in rows" :key="i" class="rounded my-6 mx-6 p-6 text-bright-900 dark:text-dim-100 bg-bright-300 dark:bg-dim-900 border border-bright-400 dark:border-dim-600">
             <dl class="grid gap-y-2 gap-x-4 grid-cols-offset">
                 <template v-for="(col, j) in Object.keys(row)" :key="j">
-                    <dt class="text-right text-gray-600 dark:text-gray-400">{{ col }}</dt>
+                    <dt class="text-right text-bright-600 dark:text-dim-400">{{ col }}</dt>
                     <dd class="">{{ row[col] }}</dd>
                 </template>
             </dl>

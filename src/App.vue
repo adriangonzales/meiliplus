@@ -1,13 +1,13 @@
 <template>
   <div :class="[theme, 'h-full']">
-    <div class="flex flex-col h-full text-gray-900 dark:text-gray-100 bg-gray-200 dark:bg-gray-800">
-      <header class="bg-gray-100 dark:bg-gray-700 p-4">
+    <div class="flex flex-col h-full text-black dark:text-white bg-bright-300 dark:bg-dim-900">
+      <header class="p-4 bg-gradient-to-b from-bright-300 to-bright-400 dark:from-dim-500 dark:to-dim-600 border-t border-bright-100 dark:border-dim-200">
           <div class="flex items-center justify-between select-none">
             <div
               class="flex-grow rounded text-sm px-2 py-1 mr-4"
               :class="{
                 'bg-primary-600 text-primary-100': connected,
-                'bg-gray-200 text-gray-500': !connected,
+                'bg-bright-200 text-bright-500': !connected,
                 }">
                 <div v-if="connected" class="flex justify-between">
                   <div>
@@ -29,7 +29,7 @@
             </button-base>
           </div>
       </header>
-      <main class="flex-grow overflow-y-auto">
+      <main class="flex-grow overflow-y-auto border-t border-bright-600 dark:border-black">
         <div v-if="!connected" class="h-full w-full flex items-center justify-center">
             <div v-if="connecting" class="flex items-center">
               <svg class="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -39,13 +39,13 @@
 
               Connecting
             </div>
-            <div v-if="!connecting" class="flex flex-col rounded shadow-xl bg-gray-100 dark:bg-gray-700 w-full max-w-lg">
+            <div v-if="!connecting" class="flex flex-col rounded shadow-xl bg-bright-100 dark:bg-dim-700 w-full max-w-lg">
               <div class="flex rounded-t">
                 <input type="input" v-model="server" class="flex-grow px-2 py-3 bg-transparent">
-                <input type="input" v-model="port" class="w-20 px-2 py-3 bg-transparent border-l border-gray-200 dark:border-gray-600">
+                <input type="input" v-model="port" class="w-20 px-2 py-3 bg-transparent border-l border-bright-200 dark:border-dim-600">
               </div>
 
-              <div class="border-t border-gray-200 dark:border-gray-600">
+              <div class="border-t border-bright-200 dark:border-dim-600">
                 <input type="password" v-model="apiKey" placeholder="API Key" class="border-0 w-full px-2 py-3 bg-transparent">
               </div>
 
@@ -58,7 +58,7 @@
             :indexes="indexes"
             @refresh-indexes="handleIndexRefresh"
             @select-index="handleIndexSelect"
-            class="h-full flex flex-col flex-shrink-0 text-sm w-60 bg-gray-300 dark:bg-gray-800 border-r border-gray-400 dark:border-gray-900" />
+            class="h-full flex flex-col flex-shrink-0 text-sm w-60 border-r border-bright-400 dark:border-black bg-bright-300 dark:bg-dim-800" />
 
           <index-results
             :index="index"

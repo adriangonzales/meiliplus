@@ -1,7 +1,7 @@
 <template>
     <nav>
         <form @submit.prevent="" class="flex w-full items-center py-2 px-4">
-            <input type="search" v-model="indexFilter" placeholder="Search for index" class="flex-grow rounded-l px-2 py-1 bg-transparent border border-gray-400 dark:border-gray-600">
+            <input type="search" v-model="indexFilter" placeholder="Search for index" class="flex-grow rounded-l px-2 py-1 bg-transparent border border-bright-400 dark:border-dim-600">
         </form>
         <div class="h-full flex flex-col overflow-y-auto">
             <div class="flex flex-col">

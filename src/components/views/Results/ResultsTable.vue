@@ -1,15 +1,15 @@
 <template>
     <table class="border-collapse w-full">
         <thead class="sticky top-0 w-full text-sm">
-            <tr class="w-full bg-gray-300 dark:bg-gray-900 border-b border-gray-400 dark:border-gray-600">
-                <th class="w-8 border-r border-gray-400 dark:border-gray-600">
+            <tr class="w-full bg-bright-300 dark:bg-dim-900 border-b border-bright-400 dark:border-dim-600">
+                <th class="w-8 border-r border-bright-400 dark:border-dim-600">
                     <input type="checkbox" v-model="setting.isCheckAll" />
                 </th>
                 <th
                     v-for="(col, index) in columns"
                     :key="index"
                     :style="{ width: col.width ? col.width : 'auto' }"
-                    class="border-r border-gray-400 dark:border-gray-600 py-2"
+                    class="border-r border-bright-400 dark:border-dim-600 py-2"
                     >
                     {{ col.label }}
                 </th>
@@ -17,7 +17,7 @@
         </thead>
         <tbody v-if="rows.length > 0">
             <tr @click="handleRowSelect" v-for="(row, i) in rows" :key="i" :class="['cursor-pointer', classTableRows[i % 2]]">
-                <td class="border-r border-gray-400 dark:border-gray-600 p-2">
+                <td class="border-r border-bright-400 dark:border-dim-600 p-2">
                     <input
                         type="checkbox"
                         :ref="(el) => {
@@ -28,7 +28,7 @@
                     />
                 </td>
                 <td v-for="(col, j) in columns" :key="j"
-                    class="border-r border-gray-400 dark:border-gray-600 p-2">
+                    class="border-r border-bright-400 dark:border-dim-600 p-2">
                     <div v-if="col.display" v-html="col.display(row)"></div>
                     <span v-else>{{ row[col.field] }}</span>
                 </td>
@@ -62,8 +62,8 @@ export default defineComponent({
   data() {
     return {
         classTableRows: [
-            'text-gray-900 dark:text-gray-100 bg-gray-200 dark:bg-gray-800',
-            'text-gray-900 dark:text-gray-100 bg-gray-300 dark:bg-gray-900'
+            'text-bright-900 dark:text-dim-100 bg-bright-100 dark:bg-dim-800',
+            'text-bright-900 dark:text-dim-100 bg-bright-200 dark:bg-dim-900'
         ]
     }
   },

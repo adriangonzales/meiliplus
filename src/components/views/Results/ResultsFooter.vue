@@ -10,13 +10,13 @@
             </button-base>
           </div>
         </div>
-        <div class="w-1/3 text-sm text-center select-none" role="status" aria-live="polite">
+        <div class="label w-1/3 text-sm text-center" role="status" aria-live="polite">
             Showing {{ setting.offset }}-{{ setting.limit }} of {{ total }}
         </div>
         <div class="w-1/3 flex items-center justify-end">
             <div class="">
-                <label for="paginator-page-limit" class="mr-2 text-sm">Limit</label>
-                <select id="paginator-page-limit" class="py-1 text-sm rounded bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-100" v-model="setting.pageSize">
+                <label for="paginator-page-limit" class="label mr-2 text-sm">Limit</label>
+                <select id="paginator-page-limit" class="py-1 text-sm rounded bg-bright-200 dark:bg-dim-800 text-bright-900 dark:text-dim-100" v-model="setting.pageSize">
                     <option value="10">10</option>
                     <option value="25">25</option>
                     <option value="50">50</option>
@@ -24,8 +24,8 @@
             </div>
 
             <div class="ml-2 mr-6">
-                <label for="paginator-page-select" class="mr-2 text-sm">Page</label>
-                <select id="paginator-page-select" class="py-1 text-sm rounded bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-100" v-model="setting.page">
+                <label for="paginator-page-select" class="label mr-2 text-sm">Page</label>
+                <select id="paginator-page-select" class="py-1 text-sm rounded bg-bright-200 dark:bg-dim-800 text-bright-900 dark:text-dim-100" v-model="setting.page">
                     <option v-for="n in setting.maxPage" :key="n">{{ n }}</option>
                 </select>
             </div>
